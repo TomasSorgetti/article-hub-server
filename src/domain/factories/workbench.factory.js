@@ -3,6 +3,7 @@ import WorkbenchEntity from "../entities/workbench.entity.js";
 export default class WorkbenchFactory {
   create({
     name,
+    description,
     owner,
     members = [],
     settings = { theme: "light", color: null, integrations: [] },
@@ -10,6 +11,7 @@ export default class WorkbenchFactory {
   }) {
     return new WorkbenchEntity({
       name,
+      description,
       owner,
       members,
       settings,
@@ -20,6 +22,7 @@ export default class WorkbenchFactory {
   createWithDefaults(owner, name = "New Workbench") {
     return new WorkbenchEntity({
       name,
+      description: "Auto-generated workspace",
       owner,
       members: [{ userId: owner, role: "owner" }],
       settings: { theme: "light", color: null, integrations: [] },

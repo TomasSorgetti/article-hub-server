@@ -1,26 +1,24 @@
+import { NotFoundError } from "../../domain/errors/index.js";
+
 export default class GetArticleUseCase {
   #articleRepository;
-  // #redisService;
+  #socketService;
 
-  constructor({ articleRepository, redisService }) {
+  constructor({ articleRepository, socketService }) {
     this.#articleRepository = articleRepository;
-    // this.#redisService = redisService;
+    this.#socketService = socketService;
   }
 
-  async execute({ slug, isAdmin }) {
-    // const cacheKey = `article:${slug}`;
-
-    //? deberia cachear todo o solo si es admin, debido al update de las views
-    // if (this.#redisService && isAdmin) {
-    //   const cachedArticle = await this.#redisService.get(cacheKey);
-    //   if (cachedArticle) return cachedArticle;
-    // }
-
+  async execute({ slug, isAdmin = false }) {
     const article = await this.#articleRepository.findBySlug(slug);
+
+    if (!article) {
+      throw new NotFoundError("Article not found");
+    }
 
     if (!isAdmin) {
       const updatedArticle = await this.#articleRepository.incrementViews(
-        article._id
+        article._id || article.id,
       );
 
       return updatedArticle;

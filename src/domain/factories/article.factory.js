@@ -12,6 +12,7 @@ export default class ArticleFactory {
     image,
     isFeatured = false,
     categories = [],
+    workbench,
   }) {
     return new ArticleEntity({
       title,
@@ -24,6 +25,7 @@ export default class ArticleFactory {
       image,
       isFeatured,
       categories,
+      workbench,
     });
   }
 }
