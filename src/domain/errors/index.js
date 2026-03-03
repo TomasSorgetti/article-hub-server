@@ -73,10 +73,17 @@ class MissingFieldError extends CustomError {
   }
 }
 
+class ForbiddenError extends CustomError {
+  constructor(message = "Forbidden access", details = {}) {
+    super(message, ERROR_CODES.AUTH.FORBIDDEN, 403, details);
+  }
+}
+
 export {
   CustomError,
   BadRequestError,
   UnauthorizedError,
+  ForbiddenError,
   InvalidCredentialsError,
   TokenExpiredError,
   NotFoundError,

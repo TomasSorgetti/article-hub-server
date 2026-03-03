@@ -1,19 +1,14 @@
-import CategoryEntity from "../../domain/entities/category.entity.js";
-
 export default class createCategoryUseCase {
   #categoryRepository;
-  // #redisService;
+  #categoryFactory;
 
-  constructor({
-    categoryRepository,
-    // redisService
-  }) {
+  constructor({ categoryRepository, categoryFactory }) {
     this.#categoryRepository = categoryRepository;
-    // this.#redisService = redisService;
+    this.#categoryFactory = categoryFactory;
   }
 
   async execute({ name, userId, isGlobal = false }) {
-    const categoryEntity = new CategoryEntity({
+    const categoryEntity = this.#categoryFactory.create({
       name,
       slug: name.toLowerCase().replace(/ /g, "-"),
       createdBy: userId,
@@ -21,13 +16,8 @@ export default class createCategoryUseCase {
     });
 
     const category = await this.#categoryRepository.create(
-      categoryEntity.toObject()
+      categoryEntity.toObject(),
     );
-
-    // if (this.#redisService) {
-    //   const cacheKey = `categories:${userId}`;
-    //   await this.#redisService.del(cacheKey);
-    // }
 
     return category;
   }

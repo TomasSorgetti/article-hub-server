@@ -67,4 +67,8 @@ export default class UserFactory {
 
     return user;
   }
+
+  validateUpdate(data) {
+    return UserEntity.validateUpdate(data);
+  }
 }

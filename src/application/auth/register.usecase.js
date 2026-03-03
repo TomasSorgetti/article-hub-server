@@ -1,6 +1,3 @@
-import UserEntity from "../../domain/entities/user.entity.js";
-import SubscriptionEntity from "../../domain/entities/subscription.entity.js";
-import WorkbenchEntity from "../../domain/entities/workbench.entity.js";
 import { AlreadyExistsError } from "../../domain/errors/index.js";
 
 export default class RegisterUseCase {
@@ -12,6 +9,9 @@ export default class RegisterUseCase {
   #jwtService;
   #emailService;
   #emailQueueService;
+  #userFactory;
+  #subscriptionFactory;
+  #workbenchFactory;
   #env;
 
   constructor({
@@ -23,6 +23,9 @@ export default class RegisterUseCase {
     jwtService,
     emailService,
     emailQueueService,
+    userFactory,
+    subscriptionFactory,
+    workbenchFactory,
     env,
   }) {
     this.#userRepository = userRepository;
@@ -33,12 +36,13 @@ export default class RegisterUseCase {
     this.#jwtService = jwtService;
     this.#emailService = emailService;
     this.#emailQueueService = emailQueueService;
+    this.#userFactory = userFactory;
+    this.#subscriptionFactory = subscriptionFactory;
+    this.#workbenchFactory = workbenchFactory;
     this.#env = env;
   }
 
   async execute({ username, email, password, preferences }) {
-    // todo => si falla algo, hacer rollback y notificar al usuario del error.
-    // todo => Add log.
     const existingUser = await this.#userRepository.findByEmail(email);
     if (existingUser) {
       throw new AlreadyExistsError("User allready exists");
@@ -46,38 +50,37 @@ export default class RegisterUseCase {
 
     const hashedPassword = await this.#hashService.hash(password);
 
-    const user = new UserEntity({
+    const userEntity = this.#userFactory.create({
       username,
       email,
       password: hashedPassword,
-      role: "user",
       preferences,
-      loginMethods: [{ provider: "email", addedAt: new Date() }],
     });
+    // Add email login method
+    userEntity.addLoginMethod({ provider: "email", addedAt: new Date() });
 
-    const newUser = await this.#userRepository.create(user);
+    const newUser = await this.#userRepository.create(userEntity.toObject());
 
     const freePlan = await this.#planRepository.findByName("free");
 
     const verificationToken = this.#jwtService.signCode(newUser._id);
     const verificationTokenExpires = new Date(Date.now() + 60 * 60 * 1000);
 
-    const subscription = new SubscriptionEntity({
+    const subscriptionEntity = this.#subscriptionFactory.create({
       userId: newUser._id,
       planId: freePlan._id,
-      status: "active",
     });
+
     const newSubscription = await this.#subscriptionRepository.create(
-      subscription.toObject()
+      subscriptionEntity.toObject(),
     );
 
-    const workbenchEntity = new WorkbenchEntity({
+    const workbenchEntity = this.#workbenchFactory.create({
       name: "My Workspace",
-      description:
-        "This is the workbench by default, you can edit by settings.",
       owner: newUser._id,
       members: [{ userId: newUser._id, role: "owner" }],
     });
+
     await this.#workbenchRepository.create(workbenchEntity.toObject());
 
     await this.#userRepository.update(newUser._id, {

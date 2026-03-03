@@ -51,6 +51,8 @@ export const registerUseCases = (container, config) => {
       sessionRepository: resolveDependency("sessionRepository"),
       jwtService: resolveDependency("jwtService"),
       hashService: resolveDependency("hashService"),
+      userFactory: resolveDependency("userFactory"),
+      sessionFactory: resolveDependency("sessionFactory"),
     }),
   );
 
@@ -65,6 +67,9 @@ export const registerUseCases = (container, config) => {
       emailQueueService: resolveDependency("emailQueueService"),
       hashService: resolveDependency("hashService"),
       jwtService: resolveDependency("jwtService"),
+      userFactory: resolveDependency("userFactory"),
+      subscriptionFactory: resolveDependency("subscriptionFactory"),
+      workbenchFactory: resolveDependency("workbenchFactory"),
       env: config.env,
     }),
   );
@@ -103,6 +108,9 @@ export const registerUseCases = (container, config) => {
       googleStrategy: resolveDependency("googleAuthStrategy"),
       notificationRepository: resolveDependency("notificationRepository"),
       socketService: resolveDependency("socketService"),
+      userFactory: resolveDependency("userFactory"),
+      sessionFactory: resolveDependency("sessionFactory"),
+      notificationFactory: resolveDependency("notificationFactory"),
     }),
   );
 
@@ -111,6 +119,7 @@ export const registerUseCases = (container, config) => {
     "getProfileUseCase",
     new GetProfileUseCase({
       userRepository: resolveDependency("userRepository"),
+      userFactory: resolveDependency("userFactory"),
     }),
   );
 
@@ -119,6 +128,7 @@ export const registerUseCases = (container, config) => {
     new UpdateProfileUseCase({
       userRepository: resolveDependency("userRepository"),
       storageService: resolveDependency("storageService"),
+      userFactory: resolveDependency("userFactory"),
     }),
   );
 
@@ -127,6 +137,7 @@ export const registerUseCases = (container, config) => {
     "getAllSessionsUseCase",
     new GetAllSessionsUseCase({
       sessionRepository: resolveDependency("sessionRepository"),
+      sessionFactory: resolveDependency("sessionFactory"),
     }),
   );
   container.register(
@@ -147,12 +158,14 @@ export const registerUseCases = (container, config) => {
     "getAllWorkbenchesUseCase",
     new getAllWorkbenchesUseCase({
       workbenchRepository: resolveDependency("workbenchRepository"),
+      workbenchFactory: resolveDependency("workbenchFactory"),
     }),
   );
   container.register(
     "createWorkbenchUseCase",
     new createWorkbenchUseCase({
       workbenchRepository: resolveDependency("workbenchRepository"),
+      workbenchFactory: resolveDependency("workbenchFactory"),
     }),
   );
   container.register(
@@ -183,6 +196,8 @@ export const registerUseCases = (container, config) => {
       workbenchRepository: resolveDependency("workbenchRepository"),
       notificationRepository: resolveDependency("notificationRepository"),
       socketService: resolveDependency("socketService"),
+      articleFactory: resolveDependency("articleFactory"),
+      notificationFactory: resolveDependency("notificationFactory"),
     }),
   );
   container.register(
@@ -191,6 +206,8 @@ export const registerUseCases = (container, config) => {
       articleRepository: resolveDependency("articleRepository"),
       notificationRepository: resolveDependency("notificationRepository"),
       socketService: resolveDependency("socketService"),
+      articleFactory: resolveDependency("articleFactory"),
+      notificationFactory: resolveDependency("notificationFactory"),
     }),
   );
   container.register(
@@ -199,6 +216,7 @@ export const registerUseCases = (container, config) => {
       articleRepository: resolveDependency("articleRepository"),
       notificationRepository: resolveDependency("notificationRepository"),
       socketService: resolveDependency("socketService"),
+      notificationFactory: resolveDependency("notificationFactory"),
     }),
   );
 
@@ -219,6 +237,7 @@ export const registerUseCases = (container, config) => {
     "createCategoryUseCase",
     new CreateCategoryUseCase({
       categoryRepository: resolveDependency("categoryRepository"),
+      categoryFactory: resolveDependency("categoryFactory"),
     }),
   );
   container.register(

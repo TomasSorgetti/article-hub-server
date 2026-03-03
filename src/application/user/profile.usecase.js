@@ -1,16 +1,16 @@
-import UserEntity from "../../domain/entities/user.entity.js";
-
 export default class GetProfileUseCase {
   #userRepository;
+  #userFactory;
 
-  constructor({ userRepository }) {
+  constructor({ userRepository, userFactory }) {
     this.#userRepository = userRepository;
+    this.#userFactory = userFactory;
   }
 
   async execute(userId) {
     const user = await this.#userRepository.findById(userId);
 
-    const userEntity = new UserEntity(user);
+    const userEntity = this.#userFactory.create(user);
     const sanitized = userEntity.sanitized();
 
     return sanitized;

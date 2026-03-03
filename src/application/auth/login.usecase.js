@@ -3,30 +3,37 @@ import {
   InvalidCredentialsError,
   UnauthorizedError,
 } from "../../domain/errors/index.js";
-import UserEntity from "../../domain/entities/user.entity.js";
-import SessionEntity from "../../domain/entities/session.entity.js";
 
 export default class LoginUseCase {
   #userRepository;
   #sessionRepository;
   #jwtService;
   #hashService;
+  #userFactory;
+  #sessionFactory;
 
-  constructor({ userRepository, sessionRepository, jwtService, hashService }) {
+  constructor({
+    userRepository,
+    sessionRepository,
+    jwtService,
+    hashService,
+    userFactory,
+    sessionFactory,
+  }) {
     this.#userRepository = userRepository;
     this.#sessionRepository = sessionRepository;
     this.#jwtService = jwtService;
     this.#hashService = hashService;
+    this.#userFactory = userFactory;
+    this.#sessionFactory = sessionFactory;
   }
 
   async execute({ email, password, rememberme, userAgent, ip }) {
-    // todo => Soporte de 2FA (Two-Factor Authentication)
-    // todo => limit a la cantidad de logins (5)
     const userFound = await this.#userRepository.findByEmail(email);
 
     if (!userFound) throw new NotFoundError("User not found");
 
-    const user = new UserEntity(userFound);
+    const user = this.#userFactory.create(userFound);
 
     if (!user.isVerified) {
       throw new UnauthorizedError("User not verified");
@@ -37,17 +44,17 @@ export default class LoginUseCase {
     }
 
     const hasEmailLogin = userFound.loginMethods?.some(
-      (method) => method.provider === "email"
+      (method) => method.provider === "email",
     );
     if (!hasEmailLogin) {
       throw new InvalidCredentialsError(
-        "This account cannot login with email, try another method."
+        "This account cannot login with email, try another method.",
       );
     }
 
     const isPasswordValid = await this.#hashService.verify(
       password,
-      user.password
+      user.password,
     );
 
     if (!isPasswordValid) {
@@ -61,7 +68,7 @@ export default class LoginUseCase {
 
     const hashedRefreshToken = await this.#hashService.hash(refreshToken);
 
-    const sessionEntity = new SessionEntity({
+    const sessionEntity = this.#sessionFactory.create({
       userId: user.id,
       refreshToken: hashedRefreshToken,
       userAgent,
@@ -69,12 +76,14 @@ export default class LoginUseCase {
       expiresAt,
     });
 
-    const newSession = await this.#sessionRepository.create(sessionEntity);
+    const newSession = await this.#sessionRepository.create(
+      sessionEntity.toObject(),
+    );
 
     const accessToken = this.#jwtService.signAccess(
       user.id,
       newSession._id.toString(),
-      rememberme
+      rememberme,
     );
 
     await this.#userRepository.update(user.id, { lastLogin: new Date() });

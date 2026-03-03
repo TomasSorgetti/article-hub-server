@@ -1,23 +1,27 @@
-import ArticleEntity from "../../domain/entities/article.entity.js";
-import NotificationEntity from "../../domain/entities/notification.entity.js";
 import { UnauthorizedError } from "../../domain/errors/index.js";
 
 export default class CreateArticleUseCase {
   #articleRepository;
   #workbenchRepository;
-  #redisService;
   #notificationRepository;
   #socketService;
+  #articleFactory;
+  #notificationFactory;
 
   constructor({
     articleRepository,
     workbenchRepository,
     notificationRepository,
     socketService,
+    articleFactory,
+    notificationFactory,
   }) {
     this.#articleRepository = articleRepository;
+    this.#workbenchRepository = workbenchRepository;
     this.#notificationRepository = notificationRepository;
     this.#socketService = socketService;
+    this.#articleFactory = articleFactory;
+    this.#notificationFactory = notificationFactory;
   }
 
   async execute({
@@ -44,7 +48,7 @@ export default class CreateArticleUseCase {
       );
     }
 
-    const newArticle = new ArticleEntity({
+    const newArticle = this.#articleFactory.create({
       title,
       slug,
       content,
@@ -55,12 +59,14 @@ export default class CreateArticleUseCase {
       image,
       isFeatured,
       categories,
+    });
+
+    await this.#articleRepository.create({
+      ...newArticle.toObject(),
       workbench,
     });
 
-    await this.#articleRepository.create(newArticle.toObject());
-
-    const notificationEntity = new NotificationEntity({
+    const notificationEntity = this.#notificationFactory.create({
       userId: author,
       type: "activity",
       message: `¡New article created: ${title}!`,

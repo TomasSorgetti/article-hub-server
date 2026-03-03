@@ -1,14 +1,15 @@
-import UserEntity from "../../domain/entities/user.entity.js";
 import { NotFoundError } from "../../domain/errors/index.js";
 import path from "path";
 
 export default class UpdateProfileUseCase {
   #userRepository;
   #storageService;
+  #userFactory;
 
-  constructor({ userRepository, storageService }) {
+  constructor({ userRepository, storageService, userFactory }) {
     this.#userRepository = userRepository;
     this.#storageService = storageService;
+    this.#userFactory = userFactory;
   }
 
   async execute(userId, userData, file) {
@@ -20,7 +21,7 @@ export default class UpdateProfileUseCase {
       const existingUser = await this.#userRepository.findById(userId);
       if (!existingUser) throw new NotFoundError("User not found");
 
-      const validatedData = UserEntity.validateUpdate(userData);
+      const validatedData = this.#userFactory.validateUpdate(userData);
 
       if (file) {
         storedFilename = `${Date.now()}-${file.originalname}`;
@@ -46,7 +47,7 @@ export default class UpdateProfileUseCase {
         });
       }
 
-      return new UserEntity(updatedUser).sanitized();
+      return this.#userFactory.create(updatedUser).sanitized();
     } catch (error) {
       if (storedFilename) {
         await this.#storageService.delete(storedFilename).catch((err) => {

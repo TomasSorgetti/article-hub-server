@@ -1,22 +1,22 @@
-import WorkbenchEntity from "../../domain/entities/workbench.entity.js";
+import { ForbiddenError, NotFoundError } from "../../domain/errors/index.js";
 
 export default class deleteWorkbenchUseCase {
   #workbenchRepository;
-  // #redisService;
 
-  constructor({
-    workbenchRepository,
-    // redisService
-  }) {
+  constructor({ workbenchRepository }) {
     this.#workbenchRepository = workbenchRepository;
-    // this.#redisService = redisService;
   }
 
   async execute({ userId, workbenchId }) {
     const workbench = await this.#workbenchRepository.findById(workbenchId);
 
+    if (!workbench) {
+      throw new NotFoundError("Workbench not found");
+    }
+
     const ownerId =
       workbench.owner._id?.toString() || workbench.owner.toString();
+
     if (ownerId !== userId) {
       throw new ForbiddenError("Only the owner can delete this workbench");
     }

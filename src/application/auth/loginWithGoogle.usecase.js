@@ -1,8 +1,4 @@
-import UserEntity from "../../domain/entities/user.entity.js";
-import SessionEntity from "../../domain/entities/session.entity.js";
-import NotificationEntity from "../../domain/entities/notification.entity.js";
 import { NotFoundError, UnauthorizedError } from "../../domain/errors/index.js";
-import WorkbenchEntity from "../../domain/entities/workbench.entity.js";
 
 export default class LoginWithGoogleUseCase {
   #userRepository;
@@ -12,6 +8,9 @@ export default class LoginWithGoogleUseCase {
   #googleStrategy;
   #notificationRepository;
   #socketService;
+  #userFactory;
+  #sessionFactory;
+  #notificationFactory;
 
   constructor({
     userRepository,
@@ -21,6 +20,9 @@ export default class LoginWithGoogleUseCase {
     googleStrategy,
     notificationRepository,
     socketService,
+    userFactory,
+    sessionFactory,
+    notificationFactory,
   }) {
     this.#userRepository = userRepository;
     this.#sessionRepository = sessionRepository;
@@ -29,6 +31,9 @@ export default class LoginWithGoogleUseCase {
     this.#googleStrategy = googleStrategy;
     this.#notificationRepository = notificationRepository;
     this.#socketService = socketService;
+    this.#userFactory = userFactory;
+    this.#sessionFactory = sessionFactory;
+    this.#notificationFactory = notificationFactory;
   }
 
   async execute({ idToken, rememberme, userAgent, ip }) {
@@ -41,60 +46,60 @@ export default class LoginWithGoogleUseCase {
     let userFound = await this.#userRepository.findByEmail(profile.email);
 
     if (!userFound) {
-      const newUserEntity = new UserEntity({
+      const newUserEntity = this.#userFactory.createWithOAuth({
         username: profile.name.replace(/\s+/g, "").toLowerCase(),
         email: profile.email,
         avatar: profile.avatar,
-        isVerified: true,
-        loginMethods: [
-          {
-            provider: "google",
-            providerId: profile.providerId,
-          },
-        ],
+        provider: "google",
+        providerId: profile.providerId,
       });
 
-      userFound = await this.#userRepository.create(newUserEntity);
+      userFound = await this.#userRepository.create(newUserEntity.toObject());
     } else {
-      const hasGoogleLogin = userFound.loginMethods?.some(
-        (m) => m.provider === "google"
-      );
+      const userEntity = this.#userFactory.create(userFound);
+      const hasGoogleLogin = userEntity.hasLoginMethod("google");
 
       if (!hasGoogleLogin) {
-        userFound.loginMethods.push({
+        userEntity.addLoginMethod({
           provider: "google",
           providerId: profile.providerId,
-        });
-        await this.#userRepository.update(userFound._id, {
-          loginMethods: userFound.loginMethods,
+          addedAt: new Date(),
         });
 
-        if (!userFound.avatar) {
-          userFound.avatar = profile.avatar;
-          await this.#userRepository.update(userFound._id, {
-            avatar: userFound.avatar,
-          });
+        const updateData = {
+          loginMethods: userEntity.loginMethods,
+        };
+
+        if (!userEntity.avatar) {
+          updateData.avatar = profile.avatar;
         }
 
-        const notificationEntity = new NotificationEntity({
-          userId: userFound._id,
+        userFound = await this.#userRepository.update(
+          userFound._id || userFound.id,
+          updateData,
+        );
+
+        const notificationEntity = this.#notificationFactory.create({
+          userId: userFound._id || userFound.id,
           type: "activity",
           message: `You have added Google as a login method.`,
-          link: null,
         });
 
         try {
           const notification = await this.#notificationRepository.create(
-            notificationEntity.toObject()
+            notificationEntity.toObject(),
           );
-          this.#socketService.sendNotification(userFound._id, notification);
+          this.#socketService.sendNotification(
+            userFound._id || userFound.id,
+            notification,
+          );
         } catch (err) {
           console.error("Failed to send notification:", err);
         }
       }
     }
 
-    const user = new UserEntity(userFound);
+    const user = this.#userFactory.create(userFound);
 
     const refreshToken = this.#jwtService.signRefresh(user.id, rememberme);
     const { exp } = this.#jwtService.verifyRefresh(refreshToken);
@@ -102,7 +107,7 @@ export default class LoginWithGoogleUseCase {
 
     const hashedRefreshToken = await this.#hashService.hash(refreshToken);
 
-    const sessionEntity = new SessionEntity({
+    const sessionEntity = this.#sessionFactory.create({
       userId: user.id,
       refreshToken: hashedRefreshToken,
       userAgent,
@@ -110,12 +115,14 @@ export default class LoginWithGoogleUseCase {
       expiresAt,
     });
 
-    const newSession = await this.#sessionRepository.create(sessionEntity);
+    const newSession = await this.#sessionRepository.create(
+      sessionEntity.toObject(),
+    );
 
     const accessToken = this.#jwtService.signAccess(
       user.id,
       newSession._id.toString(),
-      rememberme
+      rememberme,
     );
 
     await this.#userRepository.update(user.id, { lastLogin: new Date() });

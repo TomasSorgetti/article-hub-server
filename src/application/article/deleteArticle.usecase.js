@@ -1,50 +1,40 @@
-import NotificationEntity from "../../domain/entities/notification.entity.js";
-
 export default class DeleteArticleUseCase {
   #articleRepository;
   #notificationRepository;
-  // #redisService;
   #socketService;
+  #notificationFactory;
 
   constructor({
     articleRepository,
     notificationRepository,
-    // redisService,
     socketService,
+    notificationFactory,
   }) {
     this.#articleRepository = articleRepository;
     this.#notificationRepository = notificationRepository;
-    // this.#redisService = redisService;
     this.#socketService = socketService;
+    this.#notificationFactory = notificationFactory;
   }
 
   async execute(slug) {
-    const result = await this.#articleRepository.delete(slug);
+    const deletedInfo = await this.#articleRepository.delete(slug);
 
-    // if (this.#redisService) {
-    //   const keys = await this.#redisService.keys("articles:*");
-    //   for (const key of keys) {
-    //     await this.#redisService.del(key);
-    //   }
-    //   await this.#redisService.del(`article:${slug}`);
-    // }
-
-    const notificationEntity = new NotificationEntity({
-      userId: author,
+    const notificationEntity = this.#notificationFactory.create({
+      userId: deletedInfo.author,
       type: "activity",
-      message: `¡${article.title} has been deleted!`,
+      message: `¡Article ${deletedInfo.slug} has been deleted!`,
       link: null,
     });
 
     try {
       const notification = await this.#notificationRepository.create(
-        notificationEntity.toObject()
+        notificationEntity.toObject(),
       );
-      this.#socketService.sendNotification(author, notification);
+      this.#socketService.sendNotification(deletedInfo.author, notification);
     } catch (err) {
       console.error("Failed to send notification:", err);
     }
 
-    return result;
+    return deletedInfo;
   }
 }

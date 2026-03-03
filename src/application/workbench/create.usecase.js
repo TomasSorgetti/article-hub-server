@@ -1,34 +1,28 @@
-import WorkbenchEntity from "../../domain/entities/workbench.entity.js";
-
 export default class createWorkbenchUseCase {
   #workbenchRepository;
-  // #redisService;
+  #workbenchFactory;
 
-  constructor({
-    workbenchRepository,
-    // redisService
-  }) {
+  constructor({ workbenchRepository, workbenchFactory }) {
     this.#workbenchRepository = workbenchRepository;
-    // this.#redisService = redisService;
+    this.#workbenchFactory = workbenchFactory;
   }
 
   async execute({ userId, name, description }) {
-    const workbenchEntity = new WorkbenchEntity({
+    const workbenchEntity = this.#workbenchFactory.create({
       name,
       owner: userId,
       description,
     });
 
     const rawWorkbench = await this.#workbenchRepository.create(
-      workbenchEntity.toObject()
+      workbenchEntity.toObject(),
     );
 
-    // todo => es optimi crear 2
     const populated = await this.#workbenchRepository.findById(
-      rawWorkbench._id
+      rawWorkbench._id || rawWorkbench.id,
     );
 
-    const sanitized = new WorkbenchEntity(populated).sanitized();
+    const sanitized = this.#workbenchFactory.create(populated).sanitized();
 
     return sanitized;
   }
