@@ -30,7 +30,7 @@ class ArticleRepository extends ArticleRepositoryInterface {
 
       return article;
     } catch (err) {
-      if (err.name === "NotFoundError" || err.name === "InvalidInputError")
+      if (err instanceof NotFoundError || err instanceof InvalidInputError)
         throw err;
       throw new RepositoryError(err.message);
     }
@@ -52,7 +52,7 @@ class ArticleRepository extends ArticleRepositoryInterface {
 
       return article;
     } catch (err) {
-      if (err.name === "NotFoundError" || err.name === "InvalidInputError")
+      if (err instanceof NotFoundError || err instanceof InvalidInputError)
         throw err;
       throw new RepositoryError(err.message);
     }
@@ -62,10 +62,10 @@ class ArticleRepository extends ArticleRepositoryInterface {
   async findAllByWorkbench(
     filters = {},
     workbenchId,
-    { skip = 0, limit = 10 } = {}
+    { skip = 0, limit = 10 } = {},
   ) {
     try {
-      const query = {};
+      const query = { workbench: workbenchId };
 
       if (filters.status) query.status = filters.status;
       if (filters.tags) query.tags = { $regex: filters.tags, $options: "i" };
@@ -124,7 +124,7 @@ class ArticleRepository extends ArticleRepositoryInterface {
       return savedArticle.toObject();
     } catch (err) {
       if (err.code === 11000) {
-        const key = Object.keys(err.keyValue)[0];
+        const key = Object.keys(err.keyValue || {})[0] || "Field";
         throw new AlreadyExistsError(`${key} already exists`);
       }
       throw new RepositoryError(err.message);
@@ -143,7 +143,7 @@ class ArticleRepository extends ArticleRepositoryInterface {
         .findOneAndUpdate(
           { slug },
           { $set: data },
-          { new: true, runValidators: true }
+          { new: true, runValidators: true },
         )
         .lean()
         .exec();
@@ -154,10 +154,10 @@ class ArticleRepository extends ArticleRepositoryInterface {
       return article;
     } catch (err) {
       if (err.code === 11000) {
-        const key = Object.keys(err.keyValue)[0];
+        const key = Object.keys(err.keyValue || {})[0] || "Field";
         throw new AlreadyExistsError(`${key} already exists`);
       }
-      if (err.name === "NotFoundError" || err.name === "InvalidInputError")
+      if (err instanceof NotFoundError || err instanceof InvalidInputError)
         throw err;
       throw new RepositoryError(err.message);
     }
@@ -180,7 +180,7 @@ class ArticleRepository extends ArticleRepositoryInterface {
 
       return { slug: article.slug, author: article.author };
     } catch (err) {
-      if (err.name === "NotFoundError" || err.name === "InvalidInputError")
+      if (err instanceof NotFoundError || err instanceof InvalidInputError)
         throw err;
       throw new RepositoryError(err.message);
     }
@@ -201,7 +201,7 @@ class ArticleRepository extends ArticleRepositoryInterface {
 
       return article;
     } catch (err) {
-      if (err.name === "NotFoundError" || err.name === "InvalidInputError")
+      if (err instanceof NotFoundError || err instanceof InvalidInputError)
         throw err;
       throw new RepositoryError(err.message);
     }

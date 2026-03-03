@@ -28,6 +28,7 @@ export default class ApiKeyRepository extends ApiKeyRepositoryInterface {
       });
       return apiKey.toObject();
     } catch (error) {
+      if (error instanceof AlreadyExistsError) throw error;
       throw new RepositoryError(error.message);
     }
   }
@@ -38,6 +39,7 @@ export default class ApiKeyRepository extends ApiKeyRepositoryInterface {
       if (!apiKey) throw new NotFoundError("API key not found");
       return apiKey.toObject();
     } catch (error) {
+      if (error instanceof NotFoundError) throw error;
       throw new RepositoryError(error.message);
     }
   }
@@ -48,6 +50,7 @@ export default class ApiKeyRepository extends ApiKeyRepositoryInterface {
       if (!apiKey) throw new NotFoundError("API key not found");
       return apiKey.toObject();
     } catch (error) {
+      if (error instanceof NotFoundError) throw error;
       throw new RepositoryError(error.message);
     }
   }
@@ -74,6 +77,7 @@ export default class ApiKeyRepository extends ApiKeyRepositoryInterface {
 
       return apiKey.toObject();
     } catch (error) {
+      if (error instanceof NotFoundError) throw error;
       throw new RepositoryError(error.message);
     }
   }
@@ -83,11 +87,12 @@ export default class ApiKeyRepository extends ApiKeyRepositoryInterface {
       const apiKey = await this.#model.findOneAndUpdate(
         { key },
         { isActive: false },
-        { new: true }
+        { new: true },
       );
       if (!apiKey) throw new NotFoundError("API key not found");
       return apiKey.toObject();
     } catch (error) {
+      if (error instanceof NotFoundError) throw error;
       throw new RepositoryError(error.message);
     }
   }
@@ -97,11 +102,12 @@ export default class ApiKeyRepository extends ApiKeyRepositoryInterface {
       const apiKey = await this.#model.findOneAndUpdate(
         { key },
         { isActive: true },
-        { new: true }
+        { new: true },
       );
       if (!apiKey) throw new NotFoundError("API key not found");
       return apiKey.toObject();
     } catch (error) {
+      if (error instanceof NotFoundError) throw error;
       throw new RepositoryError(error.message);
     }
   }
@@ -112,6 +118,7 @@ export default class ApiKeyRepository extends ApiKeyRepositoryInterface {
       if (!apiKey) throw new NotFoundError("API key not found");
       return apiKey.toObject();
     } catch (error) {
+      if (error instanceof NotFoundError) throw error;
       throw new RepositoryError(error.message);
     }
   }
@@ -130,11 +137,12 @@ export default class ApiKeyRepository extends ApiKeyRepositoryInterface {
       const apiKey = await this.#model.findOneAndUpdate(
         { key: oldKey },
         { key: newKey },
-        { new: true }
+        { new: true },
       );
       if (!apiKey) throw new NotFoundError("API key not found");
       return apiKey.toObject();
     } catch (error) {
+      if (error instanceof NotFoundError) throw error;
       throw new RepositoryError(error.message);
     }
   }

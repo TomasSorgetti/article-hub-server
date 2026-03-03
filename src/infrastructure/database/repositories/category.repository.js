@@ -17,6 +17,7 @@ class CategoryRepository extends CategoryRepositoryInterface {
     try {
       return await this.#model.findById(id).lean().exec();
     } catch (err) {
+      if (err instanceof NotFoundError) throw err;
       throw new RepositoryError(err.message);
     }
   }
@@ -36,7 +37,7 @@ class CategoryRepository extends CategoryRepositoryInterface {
       return savedCategory.toObject();
     } catch (err) {
       if (err.code === 11000) {
-        const key = Object.keys(err.keyValue)[0];
+        const key = Object.keys(err.keyValue || {})[0] || "Field";
         throw new AlreadyExistsError(`${key} already exists`);
       }
       throw new RepositoryError(err.message);
@@ -51,8 +52,12 @@ class CategoryRepository extends CategoryRepositoryInterface {
         { new: true, lean: true },
       );
 
+      if (!updatedCategory)
+        throw new NotFoundError("Category not found or unauthorized");
+
       return updatedCategory;
     } catch (err) {
+      if (err instanceof NotFoundError) throw err;
       throw new RepositoryError(err.message);
     }
   }
@@ -63,9 +68,10 @@ class CategoryRepository extends CategoryRepositoryInterface {
         .findOneAndDelete({ _id, createdBy })
         .lean()
         .exec();
-      if (!category) throw new NotFoundError("category not found");
+      if (!category) throw new NotFoundError("Category not found");
       return { id: category._id };
     } catch (err) {
+      if (err instanceof NotFoundError) throw err;
       throw new RepositoryError(err.message);
     }
   }

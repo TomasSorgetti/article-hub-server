@@ -23,6 +23,7 @@ class UserRepository extends UserRepositoryInterface {
       if (!user) throw new NotFoundError("User not found");
       return user;
     } catch (err) {
+      if (err instanceof NotFoundError) throw err;
       throw new RepositoryError(err.message);
     }
   }
@@ -55,7 +56,7 @@ class UserRepository extends UserRepositoryInterface {
       return savedUser.toObject();
     } catch (err) {
       if (err.code === 11000) {
-        const key = Object.keys(err.keyValue)[0];
+        const key = Object.keys(err.keyValue || {})[0] || "Field";
         throw new AlreadyExistsError(`${key} already exists`);
       }
       throw new RepositoryError(err.message);
@@ -72,9 +73,10 @@ class UserRepository extends UserRepositoryInterface {
       return user;
     } catch (err) {
       if (err.code === 11000) {
-        const key = Object.keys(err.keyValue)[0];
+        const key = Object.keys(err.keyValue || {})[0] || "Field";
         throw new AlreadyExistsError(`${key} already exists`);
       }
+      if (err instanceof NotFoundError) throw err;
       throw new RepositoryError(err.message);
     }
   }
@@ -85,6 +87,7 @@ class UserRepository extends UserRepositoryInterface {
       if (!user) throw new NotFoundError("User not found");
       return { id: user._id };
     } catch (err) {
+      if (err instanceof NotFoundError) throw err;
       throw new RepositoryError(err.message);
     }
   }

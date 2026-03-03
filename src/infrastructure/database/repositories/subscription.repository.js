@@ -23,6 +23,7 @@ class SubscriptionRepository extends SubscriptionRepositoryInterface {
       if (!subscription) throw new NotFoundError("Subscription not found");
       return subscription;
     } catch (err) {
+      if (err instanceof NotFoundError) throw err;
       throw new RepositoryError(err.message);
     }
   }
@@ -37,6 +38,7 @@ class SubscriptionRepository extends SubscriptionRepositoryInterface {
       if (!subscription) throw new NotFoundError("Subscription not found");
       return subscription;
     } catch (err) {
+      if (err instanceof NotFoundError) throw err;
       throw new RepositoryError(err.message);
     }
   }
@@ -56,7 +58,7 @@ class SubscriptionRepository extends SubscriptionRepositoryInterface {
       return savedSubscription.toObject();
     } catch (err) {
       if (err.code === 11000) {
-        const key = Object.keys(err.keyValue)[0];
+        const key = Object.keys(err.keyValue || {})[0] || "Field";
         throw new AlreadyExistsError(`${key} already exists`);
       }
       throw new RepositoryError(err.message);
@@ -73,9 +75,10 @@ class SubscriptionRepository extends SubscriptionRepositoryInterface {
       return subscription;
     } catch (err) {
       if (err.code === 11000) {
-        const key = Object.keys(err.keyValue)[0];
+        const key = Object.keys(err.keyValue || {})[0] || "Field";
         throw new AlreadyExistsError(`${key} already exists`);
       }
+      if (err instanceof NotFoundError) throw err;
       throw new RepositoryError(err.message);
     }
   }
@@ -89,6 +92,7 @@ class SubscriptionRepository extends SubscriptionRepositoryInterface {
       if (!subscription) throw new NotFoundError("Subscription not found");
       return { id: subscription._id };
     } catch (err) {
+      if (err instanceof NotFoundError) throw err;
       throw new RepositoryError(err.message);
     }
   }

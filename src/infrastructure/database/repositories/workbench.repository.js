@@ -20,6 +20,7 @@ export default class WorkbenchRepository extends WorkbenchRepositoryInterface {
       if (!workbench) throw new NotFoundError("Workbench not found");
       return workbench;
     } catch (err) {
+      if (err instanceof NotFoundError) throw err;
       throw new RepositoryError(err.message);
     }
   }
@@ -33,32 +34,36 @@ export default class WorkbenchRepository extends WorkbenchRepositoryInterface {
   }
 
   async findByUserId(userId) {
-    return this.#model
-      .find({
-        $or: [{ owner: userId }, { "members.userId": userId }],
-        // isArchived: false,
-      })
-      .populate("owner", "username email avatar")
-      .populate("members.userId", "username email avatar")
-      .lean()
-      .exec();
+    try {
+      return await this.#model
+        .find({
+          $or: [{ owner: userId }, { "members.userId": userId }],
+        })
+        .populate("owner", "username email avatar")
+        .populate("members.userId", "username email avatar")
+        .lean()
+        .exec();
+    } catch (err) {
+      throw new RepositoryError(err.message);
+    }
   }
 
   async userBelongsToWorkbench(workbenchId, userId) {
-    const id = new mongoose.Types.ObjectId(workbenchId);
-    const uid = new mongoose.Types.ObjectId(userId);
+    try {
+      const id = new mongoose.Types.ObjectId(workbenchId);
+      const uid = new mongoose.Types.ObjectId(userId);
 
-    const workbench = await this.#model.findOne({
-      _id: id,
-      $or: [{ owner: uid }, { "members.userId": uid }],
-    });
+      const workbench = await this.#model.findOne({
+        _id: id,
+        $or: [{ owner: uid }, { "members.userId": uid }],
+      });
 
-    return !!workbench;
+      return !!workbench;
+    } catch (err) {
+      throw new RepositoryError(err.message);
+    }
   }
 
-  /**
-   * Todo => realmente tengo que hacer un find by id para devolver con populate?
-   */
   async create(workbenchData) {
     try {
       const workbench = new this.#model(workbenchData);
@@ -70,6 +75,9 @@ export default class WorkbenchRepository extends WorkbenchRepositoryInterface {
         .lean()
         .exec();
     } catch (err) {
+      if (err.code === 11000) {
+        throw new AlreadyExistsError("Workbench already exists");
+      }
       throw new RepositoryError(err.message);
     }
   }
@@ -83,6 +91,7 @@ export default class WorkbenchRepository extends WorkbenchRepositoryInterface {
       if (!updated) throw new NotFoundError("Workbench not found for update");
       return updated;
     } catch (err) {
+      if (err instanceof NotFoundError) throw err;
       throw new RepositoryError(err.message);
     }
   }
@@ -96,6 +105,7 @@ export default class WorkbenchRepository extends WorkbenchRepositoryInterface {
       if (!deleted) throw new NotFoundError("Workbench not found for deletion");
       return deleted;
     } catch (err) {
+      if (err instanceof NotFoundError) throw err;
       throw new RepositoryError(err.message);
     }
   }

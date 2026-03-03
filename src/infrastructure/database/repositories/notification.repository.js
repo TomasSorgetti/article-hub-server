@@ -27,7 +27,7 @@ export default class NotificationRepository extends NotificationRepositoryInterf
 
       return notification;
     } catch (err) {
-      if (err.name === "NotFoundError" || err.name === "InvalidInputError")
+      if (err instanceof NotFoundError || err instanceof InvalidInputError)
         throw err;
       throw new RepositoryError(err.message);
     }
@@ -52,6 +52,7 @@ export default class NotificationRepository extends NotificationRepositoryInterf
 
       return { items, total };
     } catch (err) {
+      if (err instanceof InvalidInputError) throw err;
       throw new RepositoryError(err.message);
     }
   }
@@ -63,7 +64,7 @@ export default class NotificationRepository extends NotificationRepositoryInterf
       return saved.toObject();
     } catch (err) {
       if (err.code === 11000) {
-        const key = Object.keys(err.keyValue)[0];
+        const key = Object.keys(err.keyValue || {})[0] || "Field";
         throw new AlreadyExistsError(`${key} already exists`);
       }
       throw new RepositoryError(err.message);
@@ -78,18 +79,12 @@ export default class NotificationRepository extends NotificationRepositoryInterf
 
       const result = await this.#model.updateMany(
         { userId, read: false },
-        { $set: { read: true } }
+        { $set: { read: true } },
       );
-
-      if (result.matchedCount === 0) {
-        throw new NotFoundError(
-          `No unread notifications found for user ${userId}`
-        );
-      }
 
       return result;
     } catch (err) {
-      if (err.name === "NotFoundError" || err.name === "InvalidInputError") {
+      if (err instanceof InvalidInputError) {
         throw err;
       }
       throw new RepositoryError(err.message);
@@ -112,7 +107,7 @@ export default class NotificationRepository extends NotificationRepositoryInterf
 
       return notification;
     } catch (err) {
-      if (err.name === "NotFoundError" || err.name === "InvalidInputError")
+      if (err instanceof NotFoundError || err instanceof InvalidInputError)
         throw err;
       throw new RepositoryError(err.message);
     }
@@ -133,7 +128,7 @@ export default class NotificationRepository extends NotificationRepositoryInterf
 
       return notification;
     } catch (err) {
-      if (err.name === "NotFoundError" || err.name === "InvalidInputError")
+      if (err instanceof NotFoundError || err instanceof InvalidInputError)
         throw err;
       throw new RepositoryError(err.message);
     }
