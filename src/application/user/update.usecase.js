@@ -4,16 +4,10 @@ import path from "path";
 
 export default class UpdateProfileUseCase {
   #userRepository;
-  // #redisService;
   #storageService;
 
-  constructor({
-    userRepository,
-    // redisService,
-    storageService,
-  }) {
+  constructor({ userRepository, storageService }) {
     this.#userRepository = userRepository;
-    // this.#redisService = redisService;
     this.#storageService = storageService;
   }
 
@@ -51,8 +45,6 @@ export default class UpdateProfileUseCase {
           console.error("Failed to delete old avatar:", err);
         });
       }
-
-      // await this.#redisService.del(`user:${userId}`);
 
       return new UserEntity(updatedUser).sanitized();
     } catch (error) {

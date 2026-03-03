@@ -7,7 +7,6 @@ class BadRequestError extends CustomError {
   }
 }
 
-// Errores de autenticación
 class UnauthorizedError extends CustomError {
   constructor(message = "Unauthorized access", details = {}) {
     super(message, ERROR_CODES.AUTH.UNAUTHORIZED, 401, details);
@@ -26,7 +25,6 @@ class TokenExpiredError extends CustomError {
   }
 }
 
-// Errores de recursos
 class NotFoundError extends CustomError {
   constructor(message = "Resource not found", details = {}) {
     super(message, ERROR_CODES.RESOURCE.NOT_FOUND, 404, details);
@@ -39,7 +37,6 @@ class AlreadyExistsError extends CustomError {
   }
 }
 
-// Errores de servidor
 class InternalServerError extends CustomError {
   constructor(message = "Internal server error", details = {}) {
     super(message, ERROR_CODES.SERVER.INTERNAL_SERVER_ERROR, 500, details);
@@ -64,7 +61,6 @@ class MissingDependencyError extends CustomError {
   }
 }
 
-// Errores de validación
 class InvalidInputError extends CustomError {
   constructor(message = "Invalid input", details = {}) {
     super(message, ERROR_CODES.VALIDATION.INVALID_INPUT, 400, details);

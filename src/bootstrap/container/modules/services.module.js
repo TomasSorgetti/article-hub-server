@@ -1,8 +1,6 @@
-// import RedisService from "../../../infrastructure/services/cache/service.js";
 import HashService from "../../../infrastructure/security/hash.js";
 import JWTService from "../../../infrastructure/security/jwt.js";
 import EmailService from "../../../infrastructure/services/email/service.js";
-import emailProcessor from "../../../infrastructure/services/queue/processors/email.processor.js";
 import SocketService from "../../../infrastructure/services/socket/service.js";
 import StripeService from "../../../infrastructure/services/stripe/service.js";
 import GoogleAuthStrategy from "../../../infrastructure/strategies/google.strategy.js";
@@ -10,7 +8,6 @@ import { storageFactory } from "../../../infrastructure/storage/index.js";
 import FakeEmailQueueService from "../../../infrastructure/services/queue/fake-email-queue.service.js";
 
 export const registerServices = (container, config) => {
-  // const redisService = new RedisService(config.redis);
   const hashService = new HashService({
     saltRounds: config.env.HASH_SALT_ROUNDS,
   });
@@ -23,7 +20,6 @@ export const registerServices = (container, config) => {
   if (emailQueueService instanceof FakeEmailQueueService) {
     emailQueueService.context = { emailService };
   }
-  // emailQueueService.process(emailProcessor(emailService));
   const socketService = new SocketService();
   const stripeService = new StripeService(config.stripe);
   const storageService = storageFactory(config);
@@ -31,7 +27,6 @@ export const registerServices = (container, config) => {
     clientId: config.env.GOOGLE_CLIENT_ID,
   });
 
-  // container.register("redisService", redisService);
   container.register("hashService", hashService);
   container.register("jwtService", jwtService);
   container.register("emailService", emailService);

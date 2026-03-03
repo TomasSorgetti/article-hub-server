@@ -33,14 +33,14 @@ export default class ArticleController {
           isFeatured,
         },
         workbenchId,
-        { page, limit }
+        { page, limit },
       );
 
       return successResponse(
         res,
         articles,
         "Article retrieved successfully",
-        200
+        200,
       );
     } catch (error) {
       next(error);
@@ -53,15 +53,6 @@ export default class ArticleController {
       const isAdmin = true; // todo=> cambiar
 
       const data = await this.#getArticleUseCase.execute({ slug, isAdmin });
-      return successResponse(res, data, "Article retrieved successfully", 200);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  async searchPost(req, res, next) {
-    try {
-      const data = "data";
       return successResponse(res, data, "Article retrieved successfully", 200);
     } catch (error) {
       next(error);
@@ -106,7 +97,6 @@ export default class ArticleController {
 
   async updatePost(req, res, next) {
     try {
-      //todo => validate user id
       const { slug } = req.params;
       const {
         title,
@@ -142,33 +132,6 @@ export default class ArticleController {
       const { slug } = req.params;
 
       const data = await this.#deleteArticleUseCase.execute(slug);
-      return successResponse(res, data, "Article retrieved successfully", 200);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  async publishPost(req, res, next) {
-    try {
-      const data = "data";
-      return successResponse(res, data, "Article retrieved successfully", 200);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  async unpublishPost(req, res, next) {
-    try {
-      const data = "data";
-      return successResponse(res, data, "Article retrieved successfully", 200);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  async starPost(req, res, next) {
-    try {
-      const data = "data";
       return successResponse(res, data, "Article retrieved successfully", 200);
     } catch (error) {
       next(error);

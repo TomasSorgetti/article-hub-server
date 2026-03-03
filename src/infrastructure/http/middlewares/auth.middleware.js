@@ -1,10 +1,8 @@
-import jwt from "jsonwebtoken";
 import {
   UnauthorizedError,
   BadRequestError,
 } from "../../../domain/errors/index.js";
 
-// todo => refactor to class
 export default class AuthMiddleware {
   constructor({ jwtService }) {
     this.jwtService = jwtService;

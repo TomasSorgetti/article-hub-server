@@ -3,6 +3,8 @@ node_modules
 
 .env
 
+.agents
+
 package-lock.json
 
 Parcial-1.pdf

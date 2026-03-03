@@ -13,13 +13,10 @@ export default class CreateArticleUseCase {
     articleRepository,
     workbenchRepository,
     notificationRepository,
-    // redisService,
     socketService,
   }) {
     this.#articleRepository = articleRepository;
     this.#notificationRepository = notificationRepository;
-    this.#workbenchRepository = workbenchRepository;
-    // this.#redisService = redisService;
     this.#socketService = socketService;
   }
 
@@ -36,22 +33,14 @@ export default class CreateArticleUseCase {
     categories,
     workbench,
   }) {
-    /**
-     * TODO
-     *
-     * si el usuario tiene un limite en la creacion de
-     * articulos (segun su plan, ej: plan free tiene 3 articulos) debería arrojar un error
-     *
-     */
-
     const isMember = await this.#workbenchRepository.userBelongsToWorkbench(
       workbench,
-      author
+      author,
     );
 
     if (!isMember) {
       throw new UnauthorizedError(
-        "User is not authorized to create articles in this workbench"
+        "User is not authorized to create articles in this workbench",
       );
     }
 
@@ -71,13 +60,6 @@ export default class CreateArticleUseCase {
 
     await this.#articleRepository.create(newArticle.toObject());
 
-    // if (this.#redisService) {
-    //   const keys = await this.#redisService.keys("articles:*");
-    //   for (const key of keys) {
-    //     await this.#redisService.del(key);
-    //   }
-    // }
-
     const notificationEntity = new NotificationEntity({
       userId: author,
       type: "activity",
@@ -87,7 +69,7 @@ export default class CreateArticleUseCase {
 
     try {
       const notification = await this.#notificationRepository.create(
-        notificationEntity.toObject()
+        notificationEntity.toObject(),
       );
       this.#socketService.sendNotification(author, notification);
     } catch (err) {

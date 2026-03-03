@@ -1,3 +1,5 @@
+import { InvalidInputError } from "../errors/index.js";
+
 export default class SubscriptionEntity {
   #id;
   #userId;

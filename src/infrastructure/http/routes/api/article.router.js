@@ -21,7 +21,7 @@ export default class ArticleRouter {
     this.#router.get(
       "/",
       ArticleValidation.getAll().handle,
-      this.#controller.getAll.bind(this.#controller)
+      this.#controller.getAll.bind(this.#controller),
     );
     /**
      * @GET /api/articles/:id
@@ -29,15 +29,7 @@ export default class ArticleRouter {
     this.#router.get(
       "/:slug",
       ArticleValidation.getBySlug().handle,
-      this.#controller.getPostBySlug.bind(this.#controller)
-    );
-    /**
-     * @GET /api/articles/search
-     */
-    this.#router.get(
-      "/search",
-      ArticleValidation.search().handle,
-      this.#controller.searchPost.bind(this.#controller)
+      this.#controller.getPostBySlug.bind(this.#controller),
     );
     /**
      * @POST /api/articles/
@@ -46,7 +38,7 @@ export default class ArticleRouter {
       "/",
       // ArticleValidation.create().handle,
       this.#authMiddleware,
-      this.#controller.createPost.bind(this.#controller)
+      this.#controller.createPost.bind(this.#controller),
     );
     /**
      * @PATCH /api/articles/:slug
@@ -55,7 +47,7 @@ export default class ArticleRouter {
       "/:slug",
       // todo => auth middleware
       ArticleValidation.update().handle,
-      this.#controller.updatePost.bind(this.#controller)
+      this.#controller.updatePost.bind(this.#controller),
     );
     /**
      * @DELETE /api/articles/:id
@@ -63,32 +55,7 @@ export default class ArticleRouter {
     this.#router.delete(
       "/:slug",
       ArticleValidation.delete().handle,
-      this.#controller.deletePost.bind(this.#controller)
-    );
-
-    /**
-     * @PATCH /api/articles/:id/publish
-     */
-    this.#router.patch(
-      "/:slug/publish",
-      ArticleValidation.publish().handle,
-      this.#controller.publishPost.bind(this.#controller)
-    );
-    /**
-     * @PATCH /api/articles/:id/unpublish
-     */
-    this.#router.patch(
-      "/:slug/unpublish",
-      ArticleValidation.unpublish().handle,
-      this.#controller.unpublishPost.bind(this.#controller)
-    );
-    /**
-     * @POST /api/articles/:id/star
-     */
-    this.#router.post(
-      "/:slug/star",
-      ArticleValidation.star().handle,
-      this.#controller.starPost.bind(this.#controller)
+      this.#controller.deletePost.bind(this.#controller),
     );
   }
 

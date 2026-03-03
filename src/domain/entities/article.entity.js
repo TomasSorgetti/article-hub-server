@@ -50,7 +50,7 @@ export default class ArticleEntity {
     if (!slugRegex.test(slug)) {
       throw new InvalidInputError(
         "Slug must contain only lowercase letters, numbers, and hyphens",
-        { field: "slug", code: ERROR_CODES.VALIDATION.INVALID_INPUT }
+        { field: "slug", code: ERROR_CODES.VALIDATION.INVALID_INPUT },
       );
     }
 
@@ -91,16 +91,9 @@ export default class ArticleEntity {
     if (status && !["DRAFT", "PUBLISHED", "ARCHIVED"].includes(status)) {
       throw new InvalidInputError(
         `${status} is not a valid status. Must be one of: DRAFT, PUBLISHED, ARCHIVED`,
-        { field: "status", code: ERROR_CODES.VALIDATION.INVALID_INPUT }
+        { field: "status", code: ERROR_CODES.VALIDATION.INVALID_INPUT },
       );
     }
-
-    // if (image && typeof image !== "string") {
-    //   throw new InvalidInputError("Image must be a string", {
-    //     field: "image",
-    //     code: ERROR_CODES.VALIDATION.INVALID_INPUT,
-    //   });
-    // }
 
     if (isFeatured !== undefined && typeof isFeatured !== "boolean") {
       throw new InvalidInputError("isFeatured must be a boolean", {
@@ -109,22 +102,13 @@ export default class ArticleEntity {
       });
     }
 
-    // if (categories && !Array.isArray(categories)) {
-    //   throw new InvalidInputError(
-    //     "Categories must be an array of strings (ids)",
-    //     {
-    //       field: "categories",
-    //       code: ERROR_CODES.VALIDATION.INVALID_INPUT,
-    //     }
-    //   );
-    // }
     if (!workbench || typeof workbench !== "string") {
       throw new InvalidInputError(
         "workbench is required and must be a string",
         {
           field: "workbench",
           code: ERROR_CODES.VALIDATION.INVALID_INPUT,
-        }
+        },
       );
     }
 

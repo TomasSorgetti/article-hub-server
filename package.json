@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "storage:link": "node scripts/storage-link.js",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
-    "test:staged": "NODE_OPTIONS=--experimental-vm-modules jest --bail --findRelatedTests --passWithNoTests",
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
+    "test:staged": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --bail --findRelatedTests --passWithNoTests",
     "prepare": "husky install",
     "build:frontend": "cd astro-project && pnpm install && pnpm run build",
     "build": "pnpm run build:frontend",
@@ -42,6 +42,7 @@
   "devDependencies": {
     "@jest/globals": "^30.2.0",
     "@types/multer": "^2.0.0",
+    "cross-env": "^10.1.0",
     "husky": "^8.0.0",
     "jest": "^30.2.0",
     "lint-staged": "^16.2.4",
