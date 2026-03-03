@@ -8,6 +8,7 @@ const env = cleanEnv(process.env, {
   NODE_ENV: str({ default: "development" }),
   API_URL: str({ default: "http://localhost" }),
   FRONT_URL: str({ default: "http://localhost:4321" }),
+  CORS_ORIGIN: str({ default: "http://localhost:5173" }),
   MONGO_URL: str({ default: "mongodb://localhost:27017/blog_saas" }),
   REDIS_URL: str({ default: "redis://redis:6379" }),
   JWT_ACCESS_SECRET: str({ default: "your_jwt_access_secret" }),

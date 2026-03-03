@@ -34,7 +34,7 @@ class Server {
     this.#app.use(express.static(path.join(__dirname, "../../public")));
     this.#app.use(
       "/uploads",
-      express.static(path.resolve(__dirname, "../../uploads"))
+      express.static(path.resolve(__dirname, "../../uploads")),
     );
 
     this.#app.get("/", (req, res) => {
@@ -50,10 +50,10 @@ class Server {
     this.#app.use(
       "/api",
       cors({
-        origin: "http://localhost:5173",
+        origin: this.#config.env.CORS_ORIGIN,
         credentials: true,
       }),
-      this.#routes.main.getRouter()
+      this.#routes.main.getRouter(),
     );
 
     this.#app.use("/fetch", this.#routes.fetch.getRouter());

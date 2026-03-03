@@ -45,7 +45,7 @@ export default class ArticleRouter {
      */
     this.#router.patch(
       "/:slug",
-      // todo => auth middleware
+      this.#authMiddleware,
       ArticleValidation.update().handle,
       this.#controller.updatePost.bind(this.#controller),
     );
@@ -54,6 +54,7 @@ export default class ArticleRouter {
      */
     this.#router.delete(
       "/:slug",
+      this.#authMiddleware,
       ArticleValidation.delete().handle,
       this.#controller.deletePost.bind(this.#controller),
     );

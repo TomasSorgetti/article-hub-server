@@ -1,4 +1,8 @@
-import { RepositoryError } from "../../../domain/errors/index.js";
+import {
+  RepositoryError,
+  AlreadyExistsError,
+  NotFoundError,
+} from "../../../domain/errors/index.js";
 import { CategoryRepositoryInterface } from "../../../domain/interfaces/repositories/category.repository.interface.js";
 
 class CategoryRepository extends CategoryRepositoryInterface {
@@ -44,7 +48,7 @@ class CategoryRepository extends CategoryRepositoryInterface {
       const updatedCategory = await this.#model.findOneAndUpdate(
         { _id, createdBy },
         { $set: data },
-        { new: true, lean: true }
+        { new: true, lean: true },
       );
 
       return updatedCategory;
