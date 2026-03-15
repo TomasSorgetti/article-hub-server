@@ -1,6 +1,8 @@
 export default class FakeEmailQueueService {
   async addJob(job) {
-    const { emailService } = job.context || {};
+    const { emailService: jobEmailService } = job.context || {};
+    const emailService = jobEmailService || this.context?.emailService;
+
     if (emailService) {
       console.log(`Executing email job immediately for ${job.to}`);
       await emailService.sendEmail({

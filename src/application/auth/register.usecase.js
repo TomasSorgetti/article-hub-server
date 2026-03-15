@@ -42,7 +42,7 @@ export default class RegisterUseCase {
     this.#env = env;
   }
 
-  async execute({ username, email, password, preferences }) {
+  async execute({ username, email, password, workbench, preferences }) {
     const existingUser = await this.#userRepository.findByEmail(email);
     if (existingUser) {
       throw new AlreadyExistsError("User allready exists");
@@ -54,14 +54,14 @@ export default class RegisterUseCase {
       username,
       email,
       password: hashedPassword,
-      preferences,
+      // preferences,
     });
     // Add email login method
     userEntity.addLoginMethod({ provider: "email", addedAt: new Date() });
 
     const newUser = await this.#userRepository.create(userEntity.toObject());
 
-    const freePlan = await this.#planRepository.findByName("free");
+    const freePlan = await this.#planRepository.findByName("Free Plan");
 
     const verificationToken = this.#jwtService.signCode(newUser._id);
     const verificationTokenExpires = new Date(Date.now() + 60 * 60 * 1000);
@@ -76,7 +76,8 @@ export default class RegisterUseCase {
     );
 
     const workbenchEntity = this.#workbenchFactory.create({
-      name: "My Workspace",
+      name: workbench || "Default Workspace",
+      description: "This is your default workspace.",
       owner: newUser._id,
       members: [{ userId: newUser._id, role: "owner" }],
     });
@@ -95,11 +96,9 @@ export default class RegisterUseCase {
       subject: "Verify your email",
       html: `
         <h1>Verify your email, token expires in 1 hour</h1>
-        <h2>IMPORTANTE: Para desarrollo, copiá el token del url y envialo en el campo "token" de la query en la ruta /api/auth/verify</h2>
-        <p>Token: ${verificationToken}</p>
         <a href='${
           this.#env.FRONT_URL
-        }/verify-email?token=${verificationToken}'>Verify email</a>
+        }/auth/confirm-email?token=${verificationToken}'>Verify email</a>
       `,
     });
 

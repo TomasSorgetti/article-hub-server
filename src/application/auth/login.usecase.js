@@ -61,6 +61,8 @@ export default class LoginUseCase {
       throw new InvalidCredentialsError("Wrong password");
     }
 
+    console.log("USER: ", user.id);
+
     const refreshToken = this.#jwtService.signRefresh(user.id, rememberme);
 
     const { exp } = this.#jwtService.verifyRefresh(refreshToken);

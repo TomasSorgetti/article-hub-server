@@ -62,7 +62,7 @@ export default class AuthController {
         res,
         { user, sessionId },
         "Auth retrieved successfully",
-        200
+        200,
       );
     } catch (error) {
       next(error);
@@ -71,18 +71,21 @@ export default class AuthController {
 
   async register(req, res, next) {
     try {
-      const { username, email, password } = req.body;
+      const { username, email, password, workbench, preferences } =
+        req.body;
 
       const response = await this.#registerUseCase.execute({
         username,
         email,
         password,
+        workbench,
+        preferences,
       });
       return successResponse(
         res,
         response,
         "User registered successfully. Please verify your email to activate your account.",
-        201
+        201,
       );
     } catch (error) {
       next(error);
@@ -172,7 +175,7 @@ export default class AuthController {
       const ip =
         req.headers["x-forwarded-for"]?.split(",")[0] ||
         req.socket.remoteAddress;
-      
+
       const { accessToken, refreshToken, user, sessionId } =
         await this.#loginWithGoogleUseCase.execute({
           idToken,
@@ -201,7 +204,7 @@ export default class AuthController {
         res,
         { user, sessionId },
         "Auth retrieved successfully",
-        200
+        200,
       );
     } catch (error) {
       next(error);

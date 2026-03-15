@@ -21,6 +21,15 @@ describe("Domain Factories", () => {
       expect(user.username).toBe("testuser");
     });
 
+    it("should correctly handle _id from database objects", () => {
+      const user = userFactory.create({
+        _id: "db_id_123",
+        username: "testuser",
+        email: "test@test.com",
+      });
+      expect(user.id).toBe("db_id_123");
+    });
+
     it("should create an admin user", () => {
       const admin = userFactory.createAdmin({
         username: "admin",

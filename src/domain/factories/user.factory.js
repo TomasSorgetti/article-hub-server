@@ -2,6 +2,8 @@ import UserEntity from "../entities/user.entity.js";
 
 export default class UserFactory {
   create({
+    _id,
+    id,
     username,
     email,
     password = null,
@@ -14,6 +16,7 @@ export default class UserFactory {
     workbenches = [],
   }) {
     return new UserEntity({
+      id: _id || id,
       username,
       email,
       password,
@@ -38,8 +41,9 @@ export default class UserFactory {
     });
   }
 
-  createAdmin({ username, email, password, avatar = null }) {
+  createAdmin({ _id, id, username, email, password, avatar = null }) {
     return new UserEntity({
+      id: _id || id,
       username,
       email,
       password,
@@ -49,8 +53,17 @@ export default class UserFactory {
     });
   }
 
-  createWithOAuth({ username, email, provider, providerId, avatar = null }) {
+  createWithOAuth({
+    _id,
+    id,
+    username,
+    email,
+    provider,
+    providerId,
+    avatar = null,
+  }) {
     const user = new UserEntity({
+      id: _id || id,
       username,
       email,
       avatar,
